@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tasklist/components/task.dart';
+import 'package:flutter_tasklist/data/task_dao.dart';
+import 'package:flutter_tasklist/data/task_inherited.dart';
+import 'package:flutter_tasklist/screens/form_screen.dart';
 
 class InitialScreen extends StatefulWidget {
   const InitialScreen({Key? key}) : super(key: key);
@@ -9,8 +12,6 @@ class InitialScreen extends StatefulWidget {
 }
 
 class _InitialScreenState extends State<InitialScreen> {
-  bool opacity = true;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,47 +19,81 @@ class _InitialScreenState extends State<InitialScreen> {
         leading: Container(),
         title: const Text('Tasks'),
       ),
-      body: AnimatedOpacity(
-        opacity: opacity ? 1 : 0,
-        duration: const Duration(milliseconds: 600),
-        child: ListView(
-          children: const [
-            Task(
-                'Study Flutter this is a very very long lorem ipsum to test how it adapts to size and overflow',
-                'assets/images/flutter_dash.png',
-                3),
-            Task(
-                'Ride my bike',
-                'assets/images/bike.jpg',
-                1),
-            Task(
-                'Meditate',
-                'assets/images/meditate.jpeg',
-                5),
-            Task(
-                'Read',
-                'assets/images/read.jpg',
-                4),
-            Task('Play video-games',
-                'assets/images/playing.jpg',
-                1),
-            Task('Gym',
-                'assets/images/gym.png',
-                3),
-            Task('Dance salsa',
-                'assets/images/salsa.jpg',
-                4),
-            SizedBox(height: 50,)
-          ],
-        ),
+      body: Padding(
+        padding: EdgeInsets.only(top: 8, bottom: 70),
+        child: FutureBuilder<List<Task>>(
+            future: TaskDAO().findAll(),
+            builder: (context, snapshot) {
+              List<Task>? items = snapshot.data;
+              switch (snapshot.connectionState) {
+                case ConnectionState.none:
+                  return Center(
+                    child: Column(
+                      children: [
+                        CircularProgressIndicator(),
+                        Text('Loading'),
+                      ],
+                    ),
+                  );
+                  break;
+                case ConnectionState.waiting:
+                  return Center(
+                    child: Column(
+                      children: [
+                        CircularProgressIndicator(),
+                        Text('Loading'),
+                      ],
+                    ),
+                  );
+                  break;
+                case ConnectionState.active:
+                  return Center(
+                    child: Column(
+                      children: [
+                        CircularProgressIndicator(),
+                        Text('Loading'),
+                      ],
+                    ),
+                  );
+                  break;
+                case ConnectionState.done:
+                  if (snapshot.hasData && items != null) {
+                    if (items.isNotEmpty) {
+                      return ListView.builder(
+                          itemCount: items.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            final Task task = items[index];
+                            return task;
+                          });
+                    }
+                    return Center(
+                      child: Column(
+                        children: [
+                          Icon(Icons.error_outline, size: 128),
+                          Text(
+                            'No tasks',
+                            style: TextStyle(fontSize: 32),
+                          )
+                        ],
+                      ),
+                    );
+                  }
+                  return Text('Error loading tasks');
+                  break;
+              }
+              return Text('Unknown error');
+            }),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          setState((){
-            opacity = !opacity;
-          });
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (newContext) => FormScreen(taskContext: context),
+            ),
+          );
         },
-        child: const Icon(Icons.remove_red_eye),
+        child: const Icon(Icons.add),
       ),
     );
   }
