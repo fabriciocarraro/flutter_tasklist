@@ -17,6 +17,13 @@ class _InitialScreenState extends State<InitialScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: Container(),
+        actions: [
+          IconButton(
+              onPressed: () {
+                setState(() {});
+              },
+              icon: Icon(Icons.refresh))
+        ],
         title: const Text('Tasks'),
       ),
       body: Padding(
@@ -91,7 +98,9 @@ class _InitialScreenState extends State<InitialScreen> {
             MaterialPageRoute(
               builder: (newContext) => FormScreen(taskContext: context),
             ),
-          );
+          ).then((value) => setState(() {
+                print('Reloading screen');
+              }));
         },
         child: const Icon(Icons.add),
       ),

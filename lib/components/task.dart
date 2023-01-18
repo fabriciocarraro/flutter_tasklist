@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tasklist/components/difficulty.dart';
+import 'package:flutter_tasklist/data/task_dao.dart';
 
 class Task extends StatefulWidget {
   final String name;
   final String photo;
   final int difficulty;
 
-  Task(this.name, this.photo, this.difficulty, {Key? key})
-      : super(key: key);
+  Task(this.name, this.photo, this.difficulty, {Key? key}) : super(key: key);
 
   int level = 1;
   int belt = 1;
@@ -18,7 +18,6 @@ class Task extends StatefulWidget {
 }
 
 class _TaskState extends State<Task> {
-
   bool assetOrNetwork() {
     if (widget.photo.contains('http')) {
       return false;
@@ -39,12 +38,12 @@ class _TaskState extends State<Task> {
                   color: (widget.belt == 2)
                       ? Colors.amber
                       : (widget.belt == 3)
-                          ? Colors.green
-                          : (widget.belt == 4)
-                              ? Colors.red
-                              : (widget.belt == 5)
-                                  ? Colors.black
-                                  : Colors.blue),
+                      ? Colors.green
+                      : (widget.belt == 4)
+                      ? Colors.red
+                      : (widget.belt == 5)
+                      ? Colors.black
+                      : Colors.blue),
               height: 140),
           Column(
             children: [
@@ -89,6 +88,24 @@ class _TaskState extends State<Task> {
                       height: 52,
                       width: 52,
                       child: ElevatedButton(
+                          onLongPress: () {
+                            showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Text("Deleting the task \"${widget.name}\""),
+                                  content: Text("Are you sure you want to delete it?"),
+                                  actions: [
+                                    TextButton(onPressed: (){Navigator.pop(context);},
+                                        child: Text("No")),
+                                    TextButton(onPressed: (){
+                                      TaskDAO().delete(widget.name);
+                                      Navigator.pop(context);
+                                      setState(() {});
+                                    }, child: Text("Yes")),
+                                  ],
+                                ),
+                            );
+                          },
                           onPressed: () {
                             setState(() {
                               if (widget.belt < 5) {
@@ -102,7 +119,8 @@ class _TaskState extends State<Task> {
                                 }
                               } else {
                                 // if it's within belt 5
-                                if (widget.level < ((widget.difficulty * 10) - 1)) {
+                                if (widget.level <
+                                    ((widget.difficulty * 10) - 1)) {
                                   // if it's below the last level
                                   widget.level++;
                                 } else if (widget.level ==
@@ -115,8 +133,9 @@ class _TaskState extends State<Task> {
                             });
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                            widget.buttonIsActive ? Colors.blue : Colors.black26,
+                            backgroundColor: widget.buttonIsActive
+                                ? Colors.blue
+                                : Colors.black26,
                           ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
